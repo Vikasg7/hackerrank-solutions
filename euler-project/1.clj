@@ -1,17 +1,6 @@
 (require 
   '[clojure.string :refer [split join]])
 
-(defn interact [fn]
-  (let [joinIfSeq #(if (seq? %) (join "\n" %) %)]
-  (->> (fn (slurp *in*))
-       (joinIfSeq)
-       (println))))
-
-(defn prepare [input]
-  (let [words  #(split % #"\s")]
-  (->> (words input)
-       (map read-string))))
-
 (defn sn [n]
   (-> (+ n 1)
       (* n)
@@ -31,6 +20,17 @@
 
 (defn solve [t & nums]
   (map sum-of-multiples nums))
+
+(defn interact [fn]
+  (let [joinIfSeq #(if (seq? %) (join "\n" %) %)]
+  (->> (fn (slurp *in*))
+       (joinIfSeq)
+       (println))))
+
+(defn prepare [input]
+  (let [words  #(split % #"\s")]
+  (->> (words input)
+       (map read-string))))
 
 (defn main []
   (let [program #(->> (prepare %) (apply solve))]

@@ -21,9 +21,9 @@
 (defn solve [t & nums]
   (map sum-of-multiples nums))
 
-(defn interact [fn]
+(defn interact [func]
   (let [joinIfSeq #(if (seq? %) (join "\n" %) %)]
-  (->> (fn (slurp *in*))
+  (->> (func (slurp *in*))
        (joinIfSeq)
        (println))))
 

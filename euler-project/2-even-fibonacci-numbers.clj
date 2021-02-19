@@ -15,9 +15,9 @@
   (let [sum #(apply + %)]
   (map (comp sum even-fibs-upto) ls)))
 
-(defn interact [fn]
+(defn interact [func]
   (let [joinIfSeq #(if (seq? %) (join "\n" %) %)]
-  (->> (fn (slurp *in*))
+  (->> (func (slurp *in*))
        (joinIfSeq)
        (println))))
 

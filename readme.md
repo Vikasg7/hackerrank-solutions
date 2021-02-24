@@ -1,1 +1,1 @@
-Functional Hacker Rank Solutions in clojure.
+Functional Hacker Rank Solutions in Clojure.

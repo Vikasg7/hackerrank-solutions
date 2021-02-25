@@ -1,21 +1,38 @@
 (require 
   '[clojure.string :refer [split join]])
 
-(defn prime-factor [[lf i n]]
-  (let [r  (mod n i)
-        ni (if (= i 2) (+ i 1) (+ i 2))
-        t  (int (Math/sqrt n))
-        nn (quot n i)]
-  (cond (= 1 n)   [lf 0   0]
-        (zero? r) [i  2  nn]
-        (> i t)   [n  ni  1]
-        :else     [lf ni  n])))
+;; Sieve of Eratosthenes
+(defn sieve [[i & is :as ps] n]
+    (let [q (quot n i)
+          r (mod n i)]
+    (cond (zero? r)     (lazy-seq (cons i (sieve ps q)))
+          (> (* i i) n) (when (> n 1) (lazy-seq [n]))
+          :else         (recur is n))))
+
+(defn prime? 
+  ([n]
+    (let [oddNums (iterate #(+ % 2) 3)
+          is      (cons 2 oddNums)]
+    (prime? n is)))
+  ([n [i & is]]
+    (let [q (quot n i)
+          r (mod n i)]
+    (cond (< n 2)       false
+          (zero? r)     false
+          (> (* i i) n) true
+          :else         (recur n is)))))
+
+;; primes in terms of sieve
+;; (def primes 
+;;   (let [oddNums (iterate #(+ % 2) 3)]
+;;   (lazy-seq (cons 2 (filter #(<= % (first (factor primes %))) oddNums)))))
+
+(def primes 
+  (let [oddNums (iterate #(+ % 2) 3)]
+  (lazy-seq (cons 2 (filter prime? oddNums)))))
 
 (defn max-prime-factor [n]
-  (->> (iterate prime-factor [1 2 n])
-       (take-while #(not= (last %) 0))
-       (map first)
-       (apply max)))
+  (last (sieve primes n)))
 
 (defn solve [t & nz]
   (map max-prime-factor nz))

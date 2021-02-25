@@ -2,14 +2,15 @@
   '[clojure.string :refer [split join]])
 
 ; Generates next fib given the last two even fibs 
-(defn even-fib [[f1 f2]]
-  (let [nxt (-> (* 4 f2) (+ f1))]
-  [f2 nxt]))
+(defn even-fibs
+  ([] 
+    (even-fibs 2 8))
+  ([a b]
+    (let [nxt (-> (*' 4 b) (+' a))]
+    (lazy-seq (cons a (even-fibs b nxt))))))
 
 (defn even-fibs-upto [l]
-  (->> (iterate even-fib [0 2])
-       (map second)
-       (take-while #(<= % l))))
+  (take-while #(<= % l) (even-fibs)))
 
 (defn solve [t & ls]
   (let [sum #(apply + %)]

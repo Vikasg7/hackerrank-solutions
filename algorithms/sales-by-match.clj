@@ -2,7 +2,7 @@
   '[clojure.string :refer [split join]])
 
 (defn solve [n & ar]
-  (let [freqs (->> (frequencies ar) (map val))
+  (let [freqs (vals (frequencies ar))
         pairs #(quot % 2)
         sum   #(apply + %)]
   (sum (map pairs freqs))))

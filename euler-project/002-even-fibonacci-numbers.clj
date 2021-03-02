@@ -1,7 +1,6 @@
 (require 
   '[clojure.string :refer [split join]])
 
-; Generates next fib given the last two even fibs 
 (defn even-fibs
   ([] 
     (even-fibs 2 8))

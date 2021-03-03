@@ -1,10 +1,10 @@
 (require 
   '[clojure.string :refer [split join]])
 
-(defn consecutive-pairs 
-  ([n xs] 
-    (consecutive-pairs xs n (count xs)))
-  ([n xs x]
+(defn consecutive-pairs
+  ([n xs]
+    (consecutive-pairs n (count xs) xs))
+  ([n x xs]
     (let [pair #(->> (drop % xs) (take n))]
     (->> (range 0 (- x (dec n)))
          (map pair)))))

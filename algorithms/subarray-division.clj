@@ -2,9 +2,9 @@
   '[clojure.string :refer [split join]])
 
 (defn consecutive-pairs 
-  ([xs n] 
+  ([n xs] 
     (consecutive-pairs xs n (count xs)))
-  ([xs n x]
+  ([n xs x]
     (let [pair #(->> (drop % xs) (take n))]
     (->> (range 0 (- x (dec n)))
          (map pair)))))
@@ -12,7 +12,7 @@
 (defn solve [n & nz]
   (let [cs    (take n nz)
         [d m] (drop n nz)
-        pairs (consecutive-pairs cs m)
+        pairs (consecutive-pairs m cs)
         pred? #(= d (apply + %))]
   (->> (filter pred? pairs)
        (count))))

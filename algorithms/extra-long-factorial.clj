@@ -3,8 +3,7 @@
 
 (defn digits [n]
   (let [toInt #(->> (str %) (read-string))]
-  (->> (str n)
-       (map toInt))))
+  (map toInt (str n))))
 
 (defn cartesian [as bs]
   (for [a as 

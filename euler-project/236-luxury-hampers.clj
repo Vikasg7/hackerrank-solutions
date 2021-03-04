@@ -41,25 +41,25 @@
                        (let [rng #(range 1 (inc %))]
                        (apply cartesian (map rng s))))
 
-        validMultCombo? (fn [m fbi-by-fais] (fn [[pma pmb]]
-                           (let [pat (->> (map safeDenom fbi-by-fais)
-                                          (map * pma)
+        validMultCombo? (fn [m fais fbis] (fn [[pma pmb]]
+                           (let [pat (->> (map * fais pma)
                                           (apply +))
-                                 pbt (->> (map safeNumer fbi-by-fais)
-                                          (map * pmb)
+                                 pbt (->> (map * fbis pmb)
                                           (apply +))]
                             (= m (calcM [pat pbt])))))
 
         validProRate? (fn [m]
                          (let [fbi-by-fais (map (fbi-by-fai m) as bs)
+                               fbis (map safeNumer fbi-by-fais)
+                               fais (map safeDenom fbi-by-fais)
                                ;Possible multiples
-                               pma (map #(quot %1 (safeDenom %2)) as fbi-by-fais)
-                               pmb (map #(quot %1 (safeNumer %2)) bs fbi-by-fais)]
+                               pma (map quot as fais)
+                               pmb (map quot bs fbis)]
                           (and (every? pos? pma)
                                (every? pos? pmb)
                                (let [;Multiple Combinations of n product for A and B
                                      mcs (cartesian (mult-combos pmb) (mult-combos pma))]
-                               (some (validMultCombo? m fbi-by-fais) mcs)))))
+                               (some (validMultCombo? m fais fbis) mcs)))))
 
         valid? (fn [m]
                   (and (> m 1)

@@ -33,33 +33,38 @@
         calcM (fn [[fat fbt]]
                  (/ (/ fat at) (/ fbt bt)))
         
-        factor (fn [m] (fn [a b]
-                  (* m (/ b a))))
+        ;fbi/fai = m(bi/ai)
+        fbi-by-fai (fn [m] (fn [a b]
+                       (* m (/ b a))))
 
         mult-combos (fn [s]
                        (let [rng #(range 1 (inc %))]
                        (apply cartesian (map rng s))))
 
-        validMultCombo? (fn [m factors] (fn [[pma pmb]]
-                           (let [pat (->> (map safeDenom factors)
+        validMultCombo? (fn [m fbi-by-fais] (fn [[pma pmb]]
+                           (let [pat (->> (map safeDenom fbi-by-fais)
                                           (map * pma)
                                           (apply +))
-                                 pbt (->> (map safeNumer factors)
+                                 pbt (->> (map safeNumer fbi-by-fais)
                                           (map * pmb)
                                           (apply +))]
                             (= m (calcM [pat pbt])))))
 
         validProRate? (fn [m]
-                         (let [factors (map (factor m) as bs)
+                         (let [fbi-by-fais (map (fbi-by-fai m) as bs)
                                ;Possible multiples
-                               pma (map #(quot %1 (safeDenom %2)) as factors)
-                               pmb (map #(quot %1 (safeNumer %2)) bs factors)
-                               ;Multiple Combinations of n product for A and B
-                               mcs (cartesian (mult-combos pmb) (mult-combos pma))]
-                         (some (validMultCombo? m factors) mcs)))
+                               pma (map #(quot %1 (safeDenom %2)) as fbi-by-fais)
+                               pmb (map #(quot %1 (safeNumer %2)) bs fbi-by-fais)]
+                          (and (every? pos? pma)
+                               (every? pos? pmb)
+                               (let [;Multiple Combinations of n product for A and B
+                                     mcs (cartesian (mult-combos pmb) (mult-combos pma))]
+                               (some (validMultCombo? m fbi-by-fais) mcs)))))
 
         valid? (fn [m]
                   (and (> m 1)
+                       (and (<= (safeNumer m) bt)
+                            (<= (safeDenom m) at))
                        (validProRate? m)))]
 
   (->> (map calcM fatfbt)
@@ -75,9 +80,11 @@
        (println))))
 
 (defn prepare [input]
-  (let [words  #(split % #"\s")]
+  (let [words  #(split % #"\s")
+        safeInt #(try (Integer/parseInt %)
+                      (catch Exception e %))]
   (->> (words input)
-       (map read-string))))
+       (map safeInt))))
 
 (defn main []
   (let [program #(->> (prepare %) (apply solve))]

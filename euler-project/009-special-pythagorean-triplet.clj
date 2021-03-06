@@ -7,7 +7,7 @@
 ;Generates pythagorean triples (=n) in reverse order
 (defn pytha-triples
   ([n]
-    (let [as (range (quot n 3) 2 -1 )]
+    (let [as (range (quot n 3) 2 -1)]
     (when (and (seq as) (even? n)) 
        (pytha-triples n as))))
   ([n [a & as]]

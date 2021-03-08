@@ -33,23 +33,24 @@
        (apply interleave)
        (take n))))
 
-; generate relative cell positions in a (rowSize - n) 
-; square sub grid.
-(defn relative-positions [n rowSize pts]
+; generate all cell positions in a (rowSize - n) square sub grid.
+(defn cell-positions [n rowSize]
   (let [rowNums (range 0 (inc (- rowSize n)))
-        colNums (range 0 (inc (- rowSize n)))
-        positions (cartesian rowNums colNums)
-        offset  (fn [[rowNum colNum]]
-                   (-> (* rowNum rowSize) (+ colNum)))]
-  (map offset positions)))
+        colNums (range 0 (inc (- rowSize n)))]
+  (cartesian rowNums colNums)))
 
-; list of n sized diagonal pairs from left to right
+; generates single n sized diag pair given a cell position
+(defn relative-diag-pair [n rowSize pts [rowNum colNum]]
+  (let [offset (-> (* rowNum rowSize) (+ colNum))]
+  (->> (drop offset pts)
+       (diag-pair n rowSize))))
+
+; sequence of n sized diagonal pairs from left to right
 ; at every cell pos in a (rowSize - n) square sub grid.
 (defn right-diag-pairs [n rowSize grid]
   (let [pts (flatten grid)]
-  (->> (relative-positions n rowSize pts)
-       (map #(drop % pts)) ; pts on and after relative pos 
-       (map #(diag-pair n rowSize %)))))
+  (->> (cell-positions n rowSize)
+       (map #(relative-diag-pair n rowSize pts %)))))
 
 (defn pairs [pts]
   (let [grid  (partition 20 pts)

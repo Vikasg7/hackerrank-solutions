@@ -41,10 +41,10 @@
                        (let [rng #(range 1 (inc %))]
                        (apply cartesian (map rng s))))
 
-        validMultCombo? (fn [m fais fbis] (fn [[pma pmb]]
-                           (let [pat (->> (map * fais pma)
+        validMultCombo? (fn [m fais fbis] (fn [mc]
+                           (let [pat (->> (map * fais mc)
                                           (apply +))
-                                 pbt (->> (map * fbis pmb)
+                                 pbt (->> (map * fbis mc)
                                           (apply +))]
                             (= m (calcM [pat pbt])))))
 
@@ -52,24 +52,22 @@
                          (let [fbi-by-fais (map (fbi-by-fai m) as bs)
                                fbis (map safeNumer fbi-by-fais)
                                fais (map safeDenom fbi-by-fais)
-                               ;Possible multiples
+                               ; Possible multiples
                                pma (map quot as fais)
-                               pmb (map quot bs fbis)]
-                          (and (every? pos? pma)
-                               (every? pos? pmb)
-                               (let [;Multiple Combinations of n product for A and B
-                                     mcs (cartesian (mult-combos pmb) (mult-combos pma))]
+                               pmb (map quot bs fbis)
+                               ; Minimum multiple per product for both A and B
+                               min-mult (map min pma pmb)]
+                          (and (every? pos? min-mult)
+                               (let [; Multiple Combinations of n product for A and B
+                                     mcs (mult-combos min-mult)]
                                (some (validMultCombo? m fais fbis) mcs)))))
 
         valid? (fn [m]
                   (and (> m 1)
-                       (and (<= (safeNumer m) bt)
-                            (<= (safeDenom m) at))
                        (validProRate? m)))]
 
   (->> (map calcM fatfbt)
        (distinct)
-       (sort) ;Helped passing all tests in time
        (filter valid?)
        (take 1))))
 

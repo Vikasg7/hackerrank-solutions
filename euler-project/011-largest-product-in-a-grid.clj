@@ -26,26 +26,30 @@
 
 ; single n sized diag pair
 (defn diag-pair [n rowSize pts]
-  (let [offset (fn [colOfSt rowSize]
-                  (-> (* colOfSt rowSize) (+ colOfSt)))
+  (let [offset (fn [colNum rowSize]
+                  (-> (* colNum rowSize) (+ colNum)))
         offsets (map offset (range 0 n) (repeat rowSize))]
   (->> (map #(drop % pts) offsets)
        (apply interleave)
        (take n))))
 
-; relative single n sized diag pair
-(defn relative-diag-pair [n rowSize pts] (fn [[rowOfSt colOfSt]]
-  (let [offset (-> (* rowOfSt rowSize) (+ colOfSt))]
-  (diag-pair n rowSize (drop offset pts)))))
+; generate relative cell positions in a (rowSize - n) 
+; square sub grid.
+(defn relative-positions [n rowSize pts]
+  (let [rowNums (range 0 (inc (- rowSize n)))
+        colNums (range 0 (inc (- rowSize n)))
+        positions (cartesian rowNums colNums)
+        offset  (fn [[rowNum colNum]]
+                   (-> (* rowNum rowSize) (+ colNum)))]
+  (map offset positions)))
 
 ; list of n sized diagonal pairs from left to right
-; at every cell in a (rowSize - n) square sub grid. 
+; at every cell pos in a (rowSize - n) square sub grid.
 (defn right-diag-pairs [n rowSize grid]
-  (let [pts (flatten grid)
-        rowOfSt (range 0 (inc (- rowSize n)))
-        colOfSt (range 0 (inc (- rowSize n)))
-        offsets (cartesian rowOfSt colOfSt)]
-  (map (relative-diag-pair n rowSize pts) offsets)))
+  (let [pts (flatten grid)]
+  (->> (relative-positions n rowSize pts)
+       (map #(drop % pts)) ; pts on and after relative pos 
+       (map #(diag-pair n rowSize %)))))
 
 (defn pairs [pts]
   (let [grid  (partition 20 pts)

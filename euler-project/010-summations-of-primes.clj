@@ -1,16 +1,6 @@
 (require 
   '[clojure.string :refer [split join]])
 
-; group-by but with user-defined acc function
-(defn group-with [compFn accFn sv coll]
-  (let [iter (fn [ret v]
-                (if-let [k (compFn v)]
-                  (->> (accFn (get ret k sv) v)
-                       (assoc! ret k))
-                  (reduced ret)))
-        ret (transient {})]
-  (persistent! (reduce iter ret coll))))
-
 ; summerize coll by another coll using compFn and accFn
 (defn summerize-by [compFn byColl accFn coll]
   (let [iter (fn [[ret coll] k]

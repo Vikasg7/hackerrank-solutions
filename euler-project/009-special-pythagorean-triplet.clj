@@ -15,7 +15,7 @@
                 (- (sqr (- a n)))
                 (/ (* 2 (- a n))))
           c (- n a b)
-          valid? (and (every? integer? [a b c])
+          valid? (and (integer? b)
                       (< a b c))]
     (cond (empty? as) (when valid? (lazy-seq [[a b c]]))
           valid?      (lazy-seq (cons [a b c] (pytha-triples n as)))

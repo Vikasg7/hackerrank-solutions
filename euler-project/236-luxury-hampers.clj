@@ -6,8 +6,7 @@
   (let [v-original-seqs (vec seqs)
         increment (fn [v-seqs]
                      (loop [i (dec (count v-seqs)), v-seqs v-seqs]
-                        (if (= i -1) 
-                           nil
+                        (if (= i -1) nil
                            (if-let [rst (next (v-seqs i))]
                               (assoc v-seqs i rst)
                               (recur (dec i) (assoc v-seqs i (v-original-seqs i)))))))

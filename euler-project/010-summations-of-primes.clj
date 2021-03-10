@@ -1,6 +1,34 @@
 (require 
   '[clojure.string :refer [split join]])
 
+; group-by but with user-defined acc function
+(defn group-with [compFn accFn sv coll]
+  (let [iter (fn [ret v]
+                (if-let [k (compFn v)]
+                  (->> (accFn (get ret k sv) v)
+                       (assoc! ret k))
+                  (reduced ret)))
+        ret (transient {})]
+  (persistent! (reduce iter ret coll))))
+
+; summerize coll by another coll using compFn and accFn
+(defn summerize-by [compFn byColl accFn coll]
+  (let [iter (fn [[ret coll] k]
+                (let [[used nColl] (split-with #(compFn % k) coll)
+                      v (reduce accFn used)
+                      nRet (if (contains? ret k) 
+                              (identity ret)
+                              (assoc ret k v))]
+                [nRet nColl]))
+        ret (sorted-map)]
+  (first (reduce iter [ret coll] byColl))))
+
+; running accumulation for values in a map
+(defn map-reductions [f mp]
+  (->> (reductions f (vals mp))
+       (map vector (keys mp))
+       (into {})))
+
 (defn prime? 
   ([n]
     (let [oddNums (iterate #(+ % 2) 3)]
@@ -22,16 +50,9 @@
     (lazy-seq (cons f (filter prime? oddNums))))))
 
 (defn prime-sum-map [nz]
-  (let [iter (fn [[_ tot lp] N]
-                (let [pms  (take-while #(<= % N) (primes lp))
-                      nlp  (last pms)
-                      ntot (reduce + tot (rest pms))]
-                [N ntot nlp]))]
-  (->> (sort nz)
-       (filter #(>= % 2))
-       (reductions iter [2 2 2]) ; [N total last-prime]
-       (map (juxt first second))
-       (into {}))))
+  (let [sorted (sort nz)]
+  (->> (summerize-by <= sorted + (primes))
+       (map-reductions +))))
 
 (defn solve [t & nz]
   (let [tbl (prime-sum-map nz)

@@ -4,22 +4,17 @@
 (defn sqr [n]
   (* n n))
 
-;Generates pythagorean triples (=n) in reverse order
-(defn pytha-triples
-  ([n]
-    (let [as (range (quot n 3) 2 -1)]
-    (when (and (seq as) (even? n)) 
-       (pytha-triples n as))))
-  ([n [a & as]]
-    (let [b (-> (sqr a)
-                (- (sqr (- a n)))
-                (/ (* 2 (- a n))))
-          c (- n a b)
-          valid? (and (integer? b)
-                      (< a b c))]
-    (cond (empty? as) (when valid? (lazy-seq [[a b c]]))
-          valid?      (lazy-seq (cons [a b c] (pytha-triples n as)))
-          :else       (recur n as)))))
+; Generates pythagorean triples (=n) in reverse order
+(defn pytha-triples [n]
+  (let [n3 (quot n 3)]
+  (for [a (range n3 2 -1)
+        :let [b (-> (sqr a)
+                    (- (sqr (- a n)))
+                    (/ (* 2 (- a n))))
+              c (- n a b)]
+        :when (< a b c)
+        :when (integer? b)]
+    [a b c])))
 
 (defn max-pytha-triple [N]
   (let [toResult #(if (nil? %) -1 (apply * %))]

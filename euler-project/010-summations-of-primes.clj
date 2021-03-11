@@ -6,18 +6,18 @@
   (let [iter (fn [[ret coll] k]
                 (let [[used nColl] (split-with #(compFn % k) coll)
                       v (reduce accFn used)
-                      nRet (if (contains? ret k) 
-                              (identity ret)
-                              (assoc ret k v))]
-                [nRet nColl]))
-        ret (sorted-map)]
-  (first (reduce iter [ret coll] byColl))))
+                      nRet (conj ret [k v])]
+                [nRet nColl]))]
+  (->> (distinct byColl)
+       (reduce iter [[] coll])
+       (first))))
 
-; running accumulation for values in a map
-(defn map-reductions [f mp]
-  (->> (reductions f (vals mp))
-       (map vector (keys mp))
-       (into {})))
+; running accumulation for values in a pair
+(defn pair-reductions [f mp]
+  (let [fsts (map first mp)
+        snds (map second mp)]
+  (->> (reductions f snds)
+       (map vector fsts))))
 
 (defn prime? 
   ([n]
@@ -42,7 +42,8 @@
 (defn prime-sum-map [nz]
   (let [sorted (sort nz)]
   (->> (summerize-by <= sorted + (primes))
-       (map-reductions +))))
+       (pair-reductions +)
+       (into {}))))
 
 (defn solve [t & nz]
   (let [tbl (prime-sum-map nz)

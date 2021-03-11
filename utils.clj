@@ -54,10 +54,12 @@
           oddNums (iterate #(+ % 2) from)]
     (lazy-seq (cons f (filter prime? oddNums))))))
 
+(def primes' (primes))
+
 ;; Sieve of Eratosthenes
 (defn sieve 
   ([n] 
-    (sieve (primes) n))
+    (sieve primes' n))
   ([[i & is :as ps] n]
     (let [q (quot n i)
           r (mod n i)]
@@ -106,3 +108,25 @@
   ([a b]
     (let [nxt (-> (*' 4 b) (+' a))]
     (lazy-seq (cons a (even-fibs b nxt))))))
+
+(defn take-until
+  "Returns a lazy sequence of successive items from coll until
+   (pred item) returns true, including that item. pred must be
+   free of side-effects."
+  [pred coll]
+    (when-let [s (seq coll)]
+      (if (pred (first s))
+        (lazy-seq (cons (first s) nil))
+        (lazy-seq (cons (first s) (take-until pred (rest s)))))))
+
+(defn count-factors [n]
+  (let [exponents #(vals (frequencies %))]
+  (if (= n 1) 1
+    (->> (exponents (sieve n))
+         (map inc)
+         (reduce *)))))
+
+(defn conj-once [pairs [f s]]
+  (if (some #(= f (first %)) pairs) 
+    (identity pairs)
+    (conj pairs [f s])))

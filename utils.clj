@@ -57,7 +57,7 @@
 ;; Sieve of Eratosthenes
 (defn sieve 
   ([n] 
-    (sieve primes n))
+    (sieve (primes) n))
   ([[i & is :as ps] n]
     (let [q (quot n i)
           r (mod n i)]

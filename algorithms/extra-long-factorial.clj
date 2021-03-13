@@ -10,38 +10,60 @@
         b bs]
       [a b]))
 
-(defn withRevIdx [xs]
-  (let [cnt (dec (count xs))
-        idx (range cnt -1 -1)]
-  (map vector idx xs)))
+(defn zeroIfEmpty [ls]
+  (if (empty? ls) (list 0) ls))
 
-(defn mult [a b]
-  (let [nCoef #(->> (digits %) (withRevIdx))
-        multCoefPair (fn [[[na a] [nb b]]]
-                        [(+ na nb) (* a b)])
-        addCoef (fn [[k cs]]
-                   (apply + (map second cs)))
-        addCoefByN #(->> (group-by first %)
-                         (into (sorted-map))
-                         (map addCoef))
-        byCarry (fn [[lc & prv] coef]
-                   (let [nCoef (+ coef lc)
-                         cur (mod nCoef 10)
-                         nc  (if (< nCoef 10) 0 (quot nCoef 10))]
-                   (conj prv cur nc)))
-        zeroIfEmpty #(if (empty? %) "0" %)
-        toResult #(->> (drop-while zero? %)
-                       (apply str)
-                       (zeroIfEmpty))]
-  (->> (cartesian (nCoef a) (nCoef b)) ; list combos of of [N Coef]
-       (map multCoefPair) ; list of [N Coef]
-       (addCoefByN) ; list of Coef grouped(+) by N
+(defn append-zeros [& ls]
+  (let [lns (map count ls)
+        mln (apply max lns)
+        zCnts (map - (repeat mln) lns)
+        reptz #(repeat % 0)]
+  (->> (map reptz zCnts)
+       (map concat ls))))
+
+(defn byCarry [[lc & prv] n]
+  (let [nn (+ n lc)
+        cur (mod nn 10)
+        nc  (quot nn 10)]
+  (conj prv cur nc)))
+       
+(defn list-add [& ls]
+  (->> (map reverse ls)
+       (reduce append-zeros)
+       (apply map +)
        (reduce byCarry [0])
-       (toResult))))
+       (drop-while zero?)
+       (zeroIfEmpty)))
+
+(defn str-add [& ls]
+  (->> (map digits ls)
+       (reduce list-add)
+       (reduce str)))
+
+(defn mult-by [n ls]
+  (->> (map #(* % n) ls)
+       (reduce byCarry [0])
+       (drop-while zero?)
+       (zeroIfEmpty)))
+
+(defn append-n-zeros [n ls]
+  (concat ls (repeat n 0)))
+
+(defn list-mult [a b]
+  (let [[as bs] (map reverse [a b])]
+  (->> (cartesian bs (list as))
+       (map #(apply mult-by %))
+       (map-indexed append-n-zeros)
+       (reduce list-add))))
+
+(defn str-mult [& ls]
+  (->> (map digits ls)
+       (reduce list-mult)
+       (reduce str)))
 
 (defn factorial [n]
   (->> (range 2 (inc n))
-       (reduce mult 1)))
+       (reduce str-mult 1)))
 
 (defn solve [n]
   (factorial n))
@@ -53,9 +75,11 @@
        (println))))
 
 (defn prepare [input]
-  (let [words  #(split % #"\s")]
+  (let [words  #(split % #"\s")
+        safeInt #(try (Integer/parseInt %)
+                      (catch Exception e %))]
   (->> (words input)
-       (map read-string))))
+       (map safeInt))))
 
 (defn main []
   (let [program #(->> (prepare %) (apply solve))]

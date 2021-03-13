@@ -5,6 +5,9 @@
   (let [toInt #(->> (str %) (read-string))]
   (map toInt (str n))))
 
+(defn zeroIfEmpty [ls]
+  (if (empty? ls) (list 0) ls))
+
 (defn append-zeros [& ls]
   (let [lns (map count ls)
         mln (apply max lns)
@@ -24,7 +27,8 @@
        (reduce append-zeros)
        (apply map +)
        (reduce byCarry [0])
-       (drop-while zero?)))
+       (drop-while zero?)
+       (zeroIfEmpty)))
 
 (defn str-add [& ls]
   (->> (map digits ls)

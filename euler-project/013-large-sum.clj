@@ -5,13 +5,13 @@
   (let [toInt #(->> (str %) (read-string))]
   (map toInt (str n))))
 
-(defn append-zeros [a b]
-  (let [[ca cb] (map count [a b])
-        zCnt (Math/abs (- ca cb))
-        addZerosTo #(concat % (repeat zCnt 0))]
-  (cond (< ca cb) [(addZerosTo a) b] 
-        (< cb ca) [a (addZerosTo b)]
-        :else [a b])))
+(defn append-zeros [& ls]
+  (let [lns (map count ls)
+        mln (apply max lns)
+        zCnts (map - (repeat mln) lns)
+        reptz #(repeat % 0)]
+  (->> (map reptz zCnts)
+       (map concat ls))))
 
 (defn byCarry [[lc & prv] n]
   (let [nn (+ n lc)
@@ -19,14 +19,17 @@
         nc  (quot nn 10)]
   (conj prv cur nc)))
 
-(defn str-add [a b]
-  (let [bits (comp reverse digits)
-       [as bs] (->> (map bits [a b])
-                    (apply append-zeros))]
-  (->> (map + as bs)
+(defn list-add [& ls]
+  (->> (map reverse ls)
+       (apply append-zeros)
+       (apply map +)
        (reduce byCarry [0])
-       (drop-while zero?)
-       (reduce str))))
+       (drop-while zero?)))
+
+(defn str-add [& ls]
+  (->> (map digits ls)
+       (apply list-add)
+       (reduce str)))
 
 (defn solve [T & nz]
   (->> (reduce str-add nz)

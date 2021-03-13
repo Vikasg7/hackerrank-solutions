@@ -8,13 +8,14 @@
 (defn zeroIfEmpty [ls]
   (if (empty? ls) (list 0) ls))
 
+(defn append-n-zeros [n ls]
+  (concat ls (repeat n 0)))
+
 (defn append-zeros [& ls]
   (let [lns (map count ls)
         mln (apply max lns)
-        zCnts (map - (repeat mln) lns)
-        reptz #(repeat % 0)]
-  (->> (map reptz zCnts)
-       (map concat ls))))
+        zCnts (map - (repeat mln) lns)]
+  (map append-n-zeros zCnts ls)))
 
 (defn byCarry [[lc & prv] n]
   (let [nn (+ n lc)
@@ -46,10 +47,12 @@
        (joinIfSeq)
        (println))))
 
+(defn safeInt [n]
+  (try (Integer/parseInt n)
+  (catch Exception e n)))
+
 (defn prepare [input]
-  (let [words  #(split % #"\s")
-        safeInt #(try (Integer/parseInt %)
-                      (catch Exception e %))]
+  (let [words  #(split % #"\s")]
   (->> (words input)
        (map safeInt))))
 

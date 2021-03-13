@@ -13,20 +13,21 @@
 (defn zeroIfEmpty [ls]
   (if (empty? ls) (list 0) ls))
 
+(defn append-n-zeros [n ls]
+  (concat ls (repeat n 0)))
+
 (defn append-zeros [& ls]
   (let [lns (map count ls)
         mln (apply max lns)
-        zCnts (map - (repeat mln) lns)
-        reptz #(repeat % 0)]
-  (->> (map reptz zCnts)
-       (map concat ls))))
+        zCnts (map - (repeat mln) lns)]
+  (map append-n-zeros zCnts ls)))
 
 (defn byCarry [[lc & prv] n]
   (let [nn (+ n lc)
         cur (mod nn 10)
         nc  (quot nn 10)]
   (conj prv cur nc)))
-       
+
 (defn list-add [& ls]
   (->> (map reverse ls)
        (reduce append-zeros)
@@ -35,19 +36,11 @@
        (drop-while zero?)
        (zeroIfEmpty)))
 
-(defn str-add [& ls]
-  (->> (map digits ls)
-       (reduce list-add)
-       (reduce str)))
-
 (defn mult-by [n ls]
-  (->> (map #(* % n) ls)
+  (->> (map * (repeat n) ls)
        (reduce byCarry [0])
        (drop-while zero?)
        (zeroIfEmpty)))
-
-(defn append-n-zeros [n ls]
-  (concat ls (repeat n 0)))
 
 (defn list-mult [a b]
   (let [[as bs] (map reverse [a b])]
@@ -74,10 +67,12 @@
        (joinIfSeq)
        (println))))
 
+(defn safeInt [n]
+  (try (Integer/parseInt n)
+  (catch Exception e n)))
+
 (defn prepare [input]
-  (let [words  #(split % #"\s")
-        safeInt #(try (Integer/parseInt %)
-                      (catch Exception e %))]
+  (let [words  #(split % #"\s")]
   (->> (words input)
        (map safeInt))))
 

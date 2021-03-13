@@ -18,17 +18,17 @@
         cur (mod nn 10)
         nc  (quot nn 10)]
   (conj prv cur nc)))
-
+       
 (defn list-add [& ls]
   (->> (map reverse ls)
-       (apply append-zeros)
+       (reduce append-zeros)
        (apply map +)
        (reduce byCarry [0])
        (drop-while zero?)))
 
 (defn str-add [& ls]
   (->> (map digits ls)
-       (apply list-add)
+       (reduce list-add)
        (reduce str)))
 
 (defn solve [T & nz]

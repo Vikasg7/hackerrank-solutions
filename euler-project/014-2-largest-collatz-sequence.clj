@@ -20,10 +20,11 @@
 
 ;; Slower trampolined version but good for stack
 ;; (defn-memo collatz-steps [n]
-;;   (trampoline (fn [n]
-;;      (cond (= n 1)   0
-;;            (even? n) #(inc (collatz-steps (/ n 2)))
-;;            :else     #(+ 2 (collatz-steps (collatz-odd n))))) n))
+;;   (let [inner (fn [n]
+;;                  (cond (= n 1)   0
+;;                        (even? n) #(inc (collatz-steps (/ n 2)))
+;;                        :else     #(+ 2 (collatz-steps (collatz-odd n)))))]
+;;   (trampoline inner n)))
 
 (defn-memo collatz-steps [n]
   (cond (= n 1)   0

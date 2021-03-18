@@ -20,7 +20,7 @@
 
 ;; A little bit slower trampolined version
 ;; Its stack safe and passes all the tests.
-;; take 1 second more than recursive version.
+;; Takes 1 second more than recursive version for 5M.
 ;; (defn-memo collatz-steps [n]
 ;;   (let [inner (fn [n]
 ;;                  (cond (= n 1)   0

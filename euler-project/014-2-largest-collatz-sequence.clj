@@ -18,7 +18,9 @@
 (defn collatz-odd [n]
   (-> (* n 3) (+ 1) (/ 2)))
 
-;; Slower trampolined version but good for stack
+;; A little bit slower trampolined version
+;; Its stack safe and passes all the tests.
+;; take 1 second more than recursive version.
 ;; (defn-memo collatz-steps [n]
 ;;   (let [inner (fn [n]
 ;;                  (cond (= n 1)   0

@@ -8,8 +8,8 @@
 (defn pytha-triples [n]
   (let [n3 (quot n 3)]
   (for [a (range n3 2 -1)
-        :let [b (-> (sqr a)
-                    (- (sqr (- a n)))
+        :let [b (-> (- (sqr a)
+                       (sqr (- a n)))
                     (/ (* 2 (- a n))))
               c (- n a b)]
         :when (< a b c)

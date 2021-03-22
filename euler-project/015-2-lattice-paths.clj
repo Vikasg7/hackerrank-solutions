@@ -2,9 +2,24 @@
   '[clojure.string :refer [split join]])
 
 (defn mod-mult [m a b]
-  (-> (* (mod b m)
-         (mod a m))
+  (-> (* (mod a m)
+         (mod b m))
       (mod m)))
+
+;; Following definition are recursive but slower
+;; (defn mod-mult [m a b]
+;;   (let [am (mod a m)]
+;;   (cond (zero? b) 0
+;;         (even? b) (mod-mult m (* 2 am) (/ b 2))
+;;         :else     (mod (+ am (mod-mult m (* 2 am) (/ (dec b) 2))) m))))
+
+;; (defn mod-mult [m a b]
+;;   (let [inner (fn [r a b]
+;;                  (let [am (mod a m)]
+;;                  (cond (zero? b) r
+;;                        (even? b) (recur r (* 2 am) (/ b 2))
+;;                        :else     (recur (mod (+ am r) m) (* 2 am) (/ (dec b) 2)))))]
+;;   (inner 0 a b)))
 
 (defn mod-exp [m a b]
   (cond (zero? a) 0

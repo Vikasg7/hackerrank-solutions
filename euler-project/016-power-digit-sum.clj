@@ -68,16 +68,13 @@
   (let [be (to-base 2 e)
         pred (fn [r b]
                 (case b
-                   \1 (list-mult (list-mult r r) [n])
-                   \0 (list-mult r r)))]
-  (reduce pred [1] be)))
-
-(defn expt [b e]
-  (.pow b e))
+                   \1 (*' (*' r r) n)
+                   \0 (*' r r)))]
+  (reduce pred 1 be)))
 
 (defn sum-tbl [nz]
   (let [pred (fn [[[ln lp] & res :as tbl] n]
-                (let [np (*' lp (expt 2M (- n ln)))]
+                (let [np (*' lp (bin-exp 2M (- n ln)))]
                 (conj tbl [n np])))]
   (->> (dedupe (sort nz))
        (reduce pred [[0 1]])

@@ -1,26 +1,16 @@
 (require 
   '[clojure.string :refer [split join]])
 
+(defn debug [n]
+  (println n)
+  n)
+
 (defn digits [n]
   (let [toInt #(->> (str %) (read-string))]
   (map toInt (str n))))
 
-(defn cartesian [as bs]
-  (for [a as 
-        b bs]
-      [a b]))
-
 (defn zeroIfEmpty [ls]
   (if (empty? ls) (list 0) ls))
-
-(defn append-n-zeros [n ls]
-  (concat ls (repeat n 0)))
-
-(defn append-zeros [& ls]
-  (let [lns (map count ls)
-        mln (apply max lns)
-        zCnts (map - (repeat mln) lns)]
-  (map append-n-zeros zCnts ls)))
 
 (defn byCarry [[lc & prv] n]
   (let [nn (+ n lc)
@@ -28,26 +18,28 @@
         nc  (quot nn 10)]
   (conj prv cur nc)))
 
-(defn list-add [& ls]
-  (->> (map reverse ls)
-       (reduce append-zeros)
-       (apply map +)
-       (reduce byCarry [0])
-       (drop-while zero?)
-       (zeroIfEmpty)))
+(defn add-products [cnt ls]
+  (cond (< cnt 2) (first ls)
+        :else     (reduce (partial mapv +) ls)))
 
-(defn mult-by [n ls]
-  (->> (map * (repeat n) ls)
-       (reduce byCarry [0])
-       (drop-while zero?)
-       (zeroIfEmpty)))
+(defn mult [ls n]
+  (mapv #(* % n) ls))
+
+(defn add-zeros [t ls]
+  (let [t (dec t)
+        zeros #(concat (repeat % 0) %2 (repeat (- t %) 0))]
+  (map-indexed zeros ls)))
 
 (defn list-mult [a b]
-  (let [[as bs] (map reverse [a b])]
-  (->> (cartesian bs (list as))
-       (map #(apply mult-by %))
-       (map-indexed append-n-zeros)
-       (reduce list-add))))
+  (let [[as bs]  (map reverse [a b])
+        products (map #(mult as %) bs)
+        pCnt     (count b)]
+  (->> (add-zeros pCnt products)
+       (filter #(some pos? %))
+       (add-products pCnt)
+       (reduce byCarry [0])
+       (drop-while zero?)
+       (zeroIfEmpty))))
 
 (defn str-mult [& ls]
   (->> (map digits ls)

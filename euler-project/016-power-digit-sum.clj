@@ -5,61 +5,13 @@
   (println n)
   n)
 
-(defmacro defn-memo [n & body]
-  `(def ~n (memoize (fn ~body))))
+(defn safeInt [n]
+  (try (Integer/parseInt n)
+  (catch Exception e n)))
 
 (defn digits [n]
-  (let [toInt #(->> (str %) (read-string))]
+  (let [toInt #(safeInt (str %))]
   (map toInt (str n))))
-
-(defn zeroIfEmpty [ls]
-  (if (empty? ls) (list 0) ls))
-
-(defn append-n-zeros [n ls] 
-  (concat ls (repeat n 0)))
-
-(defn prepend-n-zeros [n ls] 
-  (concat (repeat n 0) ls))
-  
-(defn prepend-zeros [& ls]
-  (let [lns   (map count ls)
-        mln   (apply max lns)
-        zCnts (map - (repeat mln) lns)]
-  (map prepend-n-zeros zCnts ls)))
-
-(defn byCarry [[lc & prv] n]
-  (let [nn (+ n lc)
-        cur (mod nn 10)
-        nc  (quot nn 10)]
-  (conj prv cur nc)))
-
-(defn reduce-right 
-  ([f ls]   (reduce f (reverse ls)))
-  ([f s ls] (reduce f s (reverse ls))))
-
-(defn list-add [& ls]
-  (->> (apply prepend-zeros ls)
-       (apply map +)
-       (reduce-right byCarry [0])
-       (drop-while zero?)
-       (zeroIfEmpty)))
-
-(defn mult-by [ls n]
-  (->> (map #(* % n) ls)
-       (reduce byCarry [0])
-       (drop-while zero?)
-       (zeroIfEmpty)))
-
-(defn list-mult [a b]
-  (let [[as bs] (map reverse [a b])]
-  (->> (map (partial mult-by as) bs)
-       (map-indexed append-n-zeros)
-       (reduce list-add))))
-
-(defn str-mult [& ls]
-  (->> (map digits ls)
-       (reduce list-mult)
-       (reduce str)))
 
 (defn to-base [b n]
   (Integer/toString n 2))
@@ -95,10 +47,6 @@
   (->> (func (slurp *in*))
        (joinIfSeq)
        (println))))
-
-(defn safeInt [n]
-  (try (Integer/parseInt n)
-  (catch Exception e n)))
 
 (defn prepare [input]
   (let [words  #(split % #"\s")]

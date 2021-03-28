@@ -1,21 +1,15 @@
 (require 
   '[clojure.string :as S :only [split join replace trim]])
 
-(defn parse-one-tri [n cnz]
-  (let [inner (fn [acc i nz]
-                  (let [[cnz nnz] (split-at i nz)
-                        nacc (conj acc cnz)]
-                  (cond (= i n) [nacc nnz]
-                        :else   (recur nacc (inc i) nnz))))]
-  (inner [] 1 cnz)))
-
-(defn parse-all-tris [nz]
-  (let [inner (fn [acc [n & nz]]
-                 (let [[tri nnz] (parse-one-tri n nz)
-                       nacc (conj acc tri)]
-                 (cond (empty? nnz) nacc
-                       :else        (recur nacc nnz))))]
-  (inner [] nz)))
+(defn triangles 
+  ([nz]
+    (triangles [] 1 (first nz) (rest nz)))
+  ([acc i n nz]
+      (let [[cnz nnz] (split-at i nz)
+            nacc      (conj acc cnz)]
+      (cond (empty? nnz) [nacc]
+            (= i n)      (lazy-seq (cons nacc (triangles nnz)))
+            :else        (recur nacc (inc i) n nnz)))))
 
 (defn reduce-right
   ([f coll]   (reduce f (reverse coll)))
@@ -27,7 +21,7 @@
   (first (reduce-right fold-by tri))))
 
 (defn solve [T & nz]
-  (->> (parse-all-tris nz)
+  (->> (triangles nz)
        (map max-path-sum)))
 
 (defn safeInt [n]

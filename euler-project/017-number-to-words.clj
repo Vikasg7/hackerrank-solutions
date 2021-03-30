@@ -24,17 +24,18 @@
 (defn clean [t]
   (S/trim (S/replace t #"\s+" " ")))
 
-(defn number-to-words [n]
-  (let [inner (fn [acc i n] 
-                 (let [[q m] (quot-mod n 1000)
-                       part  (str (hundred m) " " (nth powers i))
-                       nacc  (cons part acc)]
-                 (cond (zero? q) nacc
-                       (zero? m) (recur acc (inc i) q)
-                       :else     (recur nacc (inc i) q))))]
-  (->> (inner [] 0 n)
-       (S/join " ")
-       (clean))))
+(defn number-to-words
+  ([n] 
+    (->> (number-to-words [] 0 n)
+         (S/join " ")
+         (clean)))
+  ([acc i n] 
+    (let [[q m] (quot-mod n 1000)
+          part  (str (hundred m) " " (nth powers i))
+          nacc  (cons part acc)]
+    (cond (zero? q) nacc
+          (zero? m) (recur acc (inc i) q)
+          :else     (recur nacc (inc i) q)))))
 
 (defn solve [T & nz]
   (map number-to-words nz))

@@ -22,8 +22,9 @@
   (zero? (mod n d)))
 
 (defn leap? [y]
-  (or (div? y 400)
-      (and (div? y 4) (not (div? y 100)))))
+  (cond (div? y 400) true
+        (div? y 100) false
+        :else        (div? y 4)))
 
 (defn days
   ([coll]

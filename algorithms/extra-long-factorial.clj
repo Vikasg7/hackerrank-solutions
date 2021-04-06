@@ -5,8 +5,12 @@
   (println n)
   n)
 
+(defn safeInt [n]
+  (try (Long/parseLong n)
+  (catch Exception e n)))
+
 (defn digits [n]
-  (let [toInt #(->> (str %) (read-string))]
+  (let [toInt #(->> (str %) (safeInt))]
   (map toInt (str n))))
 
 (defn zeroIfEmpty [ls]
@@ -23,21 +27,31 @@
         :else     (reduce (partial mapv +) ls)))
 
 (defn mult [ls n]
-  (mapv #(* % n) ls))
+  (cond (zero? n) nil
+        (= n 1)   ls
+        :else     (mapv #(* % n) ls)))
+
+(defn zeros [t i n]
+  (when (some? n)
+    (concat (repeat i 0) n (repeat (- t i) 0))))
 
 (defn add-zeros [t ls]
-  (let [t (dec t)
-        zeros #(concat (repeat % 0) %2 (repeat (- t %) 0))]
-  (map-indexed zeros ls)))
+  (let [t (dec t)]
+  (keep-indexed (partial zeros t) ls)))
+
+(defn concat-with [suffix prefix]
+  (concat prefix suffix))
 
 (defn list-mult [a b]
-  (let [[as bs]  (map reverse [a b])
+  (let [rev      (map reverse [a b])
+        [as bs]  (map #(drop-while zero? %) rev)
+        tZeros   (mapcat #(take-while zero? %) rev)
         products (map #(mult as %) bs)
-        pCnt     (count b)]
+        pCnt     (count bs)]
   (->> (add-zeros pCnt products)
-       (filter #(some pos? %))
        (add-products pCnt)
        (reduce byCarry [0])
+       (concat-with tZeros)
        (drop-while zero?)
        (zeroIfEmpty))))
 
@@ -58,10 +72,6 @@
   (->> (func (slurp *in*))
        (joinIfSeq)
        (println))))
-
-(defn safeInt [n]
-  (try (Integer/parseInt n)
-  (catch Exception e n)))
 
 (defn prepare [input]
   (let [words  #(split % #"\s")]

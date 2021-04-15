@@ -70,22 +70,32 @@
                        (reduce * 1)
                        (flip - n)))))
 
-(defn amicable? [n]
-  (let [a (factor-sum n)
-        b (factor-sum a)]
-  (and (not= a b)
-       (= n b))))
+(defn bin-search [xs x]
+  (java.util.Collections/binarySearch xs x compare))
 
-(def amicables
-  (->> (iterate inc 1)
-       (filter amicable?)))
+(defn present-in? [coll n]
+  (not (neg? (bin-search coll n))))
 
-(defn amicable-sum [n]
-  (->> (take-while #(<= % n) amicables)
-       (reduce + 0)))
+(defn abundant? [n]
+  (> (factor-sum n) n))
+
+(def abundants
+  (->> (range 12 (inc 20161))
+       (filter abundant?)))
+
+(defn sum-of-abundants? [n]
+  (let [haystack (take-while #(< % n) abundants)
+        needles  (take-while #(<= % (quot n 2)) haystack)
+        pred? #(present-in? haystack (- n %))]
+  (some pred? needles)))
+
+(defn abundant-sum? [n]
+  (cond (> n 20161)           "YES"
+        (sum-of-abundants? n) "YES"
+        :else                 "NO"))
 
 (defn solve [t & nz]
-  (map amicable-sum nz))
+  (map abundant-sum? nz))
 
 (defn safeInt [n]
   (try (Long/parseLong n)
